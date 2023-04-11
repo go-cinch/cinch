@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/go-cinch/cinch/cmd/cinch/internal/project"
+	"github.com/go-cinch/cinch/cmd/cinch/internal/run"
 	"github.com/spf13/cobra"
 	"log"
 )
@@ -15,6 +16,7 @@ var rootCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(project.CmdNew)
+	rootCmd.AddCommand(run.CmdRun)
 }
 
 func main() {
