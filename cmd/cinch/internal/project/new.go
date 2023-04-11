@@ -57,8 +57,7 @@ func (p *Project) New(ctx context.Context, dir string, layout string, branch str
 
 	fmt.Println(color.WhiteString("$ cd %s", p.Name))
 	fmt.Println(color.WhiteString("$ make all"))
-	fmt.Println(color.WhiteString("$ cd cmd/%s", p.Name))
-	fmt.Println(color.WhiteString("$ go run main.go wire_gen.go\n"))
+	fmt.Println(color.WhiteString("$ cinch run"))
 
 	fmt.Println("			🤝 Thanks for using Cinch")
 	fmt.Println("	📚 Tutorial: https://go-cinch.github.io/docs/#/started/0.init")
@@ -66,15 +65,11 @@ func (p *Project) New(ctx context.Context, dir string, layout string, branch str
 }
 
 func (p *Project) customChange(to string) (err error) {
-	err = replaceContent(filepath.Join(to, "cmd", "server", "main.go"), "layout", p.Name)
-	if err != nil {
-		return
-	}
+	replaceContent(filepath.Join(to, "cmd", "server", "main.go"), "layout", p.Name)
 
-	err = os.Rename(filepath.Join(to, "cmd", "server"), filepath.Join(to, "cmd", p.Name))
-	if err != nil {
-		return
-	}
+	replaceContent(filepath.Join(to, "Dockerfile"), "./server", "./"+p.Name)
+
+	os.Rename(filepath.Join(to, "cmd", "server"), filepath.Join(to, "cmd", p.Name))
 
 	if p.Name == "game" {
 		return
@@ -95,18 +90,13 @@ func (p *Project) customChange(to string) (err error) {
 		filepath.Join(to, "internal", "server", "grpc.go"),
 		filepath.Join(to, "internal", "server", "http.go"),
 		filepath.Join(to, "internal", "service", "game.go"),
+		filepath.Join(to, "internal", "service", "idempotent.go"),
 		filepath.Join(to, "internal", "service", "service.go"),
 	}
 
 	for _, item := range contents {
-		err = replaceContent(item, "game", p.Name)
-		if err != nil {
-			return
-		}
-		err = replaceContent(item, "Game", camelCase(p.Name))
-		if err != nil {
-			return
-		}
+		replaceContent(item, "game", p.Name)
+		replaceContent(item, "Game", camelCase(p.Name))
 	}
 
 	renames := [][2]string{
@@ -149,10 +139,7 @@ func (p *Project) customChange(to string) (err error) {
 	}
 
 	for _, item := range renames {
-		err = os.Rename(item[0], item[1])
-		if err != nil {
-			return
-		}
+		os.Rename(item[0], item[1])
 	}
 
 	batchGofmt(to)
