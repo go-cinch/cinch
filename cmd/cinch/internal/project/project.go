@@ -17,7 +17,7 @@ import (
 var CmdNew = &cobra.Command{
 	Use:   "new",
 	Short: "Create a service from layout",
-	Long:  "Create a service from git layout repository. Example: cinch add game",
+	Long:  "Create a service from git layout repository. Example: cinch new game",
 	Run:   run,
 }
 
