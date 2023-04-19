@@ -66,6 +66,7 @@ func (p *Project) New(ctx context.Context, dir string, layout string, branch str
 
 func (p *Project) customChange(to string) (err error) {
 	replaceContent(filepath.Join(to, "cmd", "server", "main.go"), "layout", p.Name)
+	replaceContent(filepath.Join(to, "cmd", "server", "main.go"), "LAYOUT", strings.ToUpper(p.Name))
 
 	replaceContent(filepath.Join(to, "Dockerfile"), "./server", "./"+p.Name)
 
