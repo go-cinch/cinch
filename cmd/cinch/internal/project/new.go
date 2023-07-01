@@ -3,16 +3,15 @@ package project
 import (
 	"context"
 	"fmt"
+	"github.com/AlecAivazis/survey/v2"
 	"github.com/go-cinch/cinch/cmd/cinch/internal/base"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"regexp"
 	"strings"
 
-	"github.com/AlecAivazis/survey/v2"
 	"github.com/fatih/color"
 )
 
@@ -67,6 +66,8 @@ func (p *Project) New(ctx context.Context, dir string, layout string, branch str
 func (p *Project) customChange(to string) (err error) {
 	replaceContent(filepath.Join(to, "cmd", "server", "main.go"), "layout", p.Name)
 	replaceContent(filepath.Join(to, "cmd", "server", "main.go"), "LAYOUT", strings.ToUpper(p.Name))
+	replaceContent(filepath.Join(to, "configs", "config.yml"), "layout", p.Name)
+	replaceContent(filepath.Join(to, "configs", "gen.yml"), "layout", p.Name)
 
 	replaceContent(filepath.Join(to, "Dockerfile"), "./server", "./"+p.Name)
 
@@ -83,15 +84,12 @@ func (p *Project) customChange(to string) (err error) {
 		filepath.Join(to, "cmd", p.Name, "wire_gen.go"),
 		filepath.Join(to, "internal", "biz", "biz.go"),
 		filepath.Join(to, "internal", "biz", "game.go"),
-		filepath.Join(to, "internal", "conf", "db", "2022081510-game.sql"),
 		filepath.Join(to, "internal", "data", "data.go"),
 		filepath.Join(to, "internal", "data", "game.go"),
+		filepath.Join(to, "internal", "db", "migrations", "2022081510-game.sql"),
 		filepath.Join(to, "internal", "pkg", "task", "task.go"),
-		filepath.Join(to, "internal", "server", "middleware", "whitelist.go"),
 		filepath.Join(to, "internal", "server", "grpc.go"),
 		filepath.Join(to, "internal", "server", "http.go"),
-		filepath.Join(to, "internal", "service", "game.go"),
-		filepath.Join(to, "internal", "service", "idempotent.go"),
 		filepath.Join(to, "internal", "service", "service.go"),
 	}
 
@@ -126,12 +124,8 @@ func (p *Project) customChange(to string) (err error) {
 			filepath.Join(to, "internal", "biz", p.Name+".go"),
 		},
 		{
-			filepath.Join(to, "internal", "conf", "db", "2022081510-game.sql"),
-			filepath.Join(to, "internal", "conf", "db", "2022081510-"+p.Name+".sql"),
-		},
-		{
-			filepath.Join(to, "internal", "data", "game.go"),
-			filepath.Join(to, "internal", "data", p.Name+".go"),
+			filepath.Join(to, "internal", "db", "migrations", "2022081510-game.sql"),
+			filepath.Join(to, "internal", "db", "migrations", "2022081510-"+p.Name+".sql"),
 		},
 		{
 			filepath.Join(to, "internal", "service", "game.go"),
@@ -143,7 +137,7 @@ func (p *Project) customChange(to string) (err error) {
 		os.Rename(item[0], item[1])
 	}
 
-	batchGofmt(to)
+	base.Lint(to)
 
 	return
 }
@@ -173,13 +167,4 @@ func camelCase(str string) string {
 	camel = caser.String(str)
 	camel = strings.Replace(camel, " ", "", -1)
 	return camel
-}
-
-func batchGofmt(path string) {
-	_ = filepath.Walk(path, func(path string, info os.FileInfo, err error) (e error) {
-		if err == nil && info != nil && !info.IsDir() && strings.HasSuffix(path, ".go") {
-			exec.Command("gofmt", "-l", "-w", "-s", path).Run()
-		}
-		return
-	})
 }
