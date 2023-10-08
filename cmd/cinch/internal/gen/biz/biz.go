@@ -86,10 +86,8 @@ import (
 
 	"github.com/go-cinch/common/constant"
 	"github.com/go-cinch/common/copierx"
-	"github.com/go-cinch/common/middleware/i18n"
 	"github.com/go-cinch/common/page"
 	"github.com/go-cinch/common/utils"
-	"%v/api/reason"
 	"%v/internal/conf"
 	"github.com/pkg/errors"
 )
@@ -151,51 +149,51 @@ func (uc *%vUseCase) Create(ctx context.Context, item *%v) error {
 func (uc *%vUseCase) Get(ctx context.Context, id uint64) (rp *%v, err error) {
 	rp = &%v{}
 	action := strings.Join([]string{"get", strconv.FormatUint(id, 10)}, "_")
-	str, ok := uc.cache.Get(ctx, action, func(ctx context.Context) (string, bool) {
+	str, err := uc.cache.Get(ctx, action, func(ctx context.Context) (string, error) {
 		return uc.get(ctx, action, id)
 	})
-	if ok {
-		utils.Json2Struct(&rp, str)
-		if rp.Id == constant.UI0 {
-			err = reason.ErrorNotFound("%%s %v.id: %%d", i18n.FromContext(ctx).T(RecordNotFound), id)
-		}
+	if err != nil {
 		return
 	}
-	err = reason.ErrorTooManyRequests(i18n.FromContext(ctx).T(TooManyRequests))
+	if rp.Id == constant.UI0 {
+		err = ErrRecordNotFound(ctx)
+		return
+	}
+	utils.Json2Struct(&rp, str)
 	return
 }
 
-func (uc *%vUseCase) get(ctx context.Context, action string, id uint64) (res string, ok bool) {
+func (uc *%vUseCase) get(ctx context.Context, action string, id uint64) (res string, err error) {
 	// read data from db and write to cache
 	rp := &%v{}
 	item, err := uc.repo.Get(ctx, id)
-	notFound := errors.Is(err, reason.ErrorNotFound(i18n.FromContext(ctx).T(RecordNotFound)))
+	notFound := errors.Is(err, ErrRecordNotFound(ctx))
 	if err != nil && !notFound {
 		return
 	}
 	copierx.Copy(&rp, item)
 	res = utils.Struct2Json(rp)
 	uc.cache.Set(ctx, action, res, notFound)
-	ok = true
 	return
 }
 
-func (uc *%vUseCase) Find(ctx context.Context, condition *Find%v) (rp []%v) {
+func (uc *%vUseCase) Find(ctx context.Context, condition *Find%v) (rp []%v, err error) {
 	// use md5 string as cache replay json str, key is short
 	action := strings.Join([]string{"find", utils.StructMd5(condition)}, "_")
-	str, ok := uc.cache.Get(ctx, action, func(ctx context.Context) (string, bool) {
+	str, err := uc.cache.Get(ctx, action, func(ctx context.Context) (string, error) {
 		return uc.find(ctx, action, condition)
 	})
-	if ok {
-		var cache Find%vCache
-		utils.Json2Struct(&cache, str)
-		condition.Page = cache.Page
-		rp = cache.List
+	if err != nil {
+		return
 	}
+	var cache Find%vCache
+	utils.Json2Struct(&cache, str)
+	condition.Page = cache.Page
+	rp = cache.List
 	return
 }
 
-func (uc *%vUseCase) find(ctx context.Context, action string, condition *Find%v) (res string, ok bool) {
+func (uc *%vUseCase) find(ctx context.Context, action string, condition *Find%v) (res string, err error) {
 	// read data from db and write to cache
 	list := uc.repo.Find(ctx, condition)
 	var cache Find%vCache
@@ -203,7 +201,6 @@ func (uc *%vUseCase) find(ctx context.Context, action string, condition *Find%v)
 	cache.Page = condition.Page
 	res = utils.Struct2Json(cache)
 	uc.cache.Set(ctx, action, res, len(list) == 0)
-	ok = true
 	return
 }
 
@@ -225,7 +222,7 @@ func (uc *%vUseCase) Delete(ctx context.Context, ids ...uint64) error {
 	})
 }
 `,
-		module, module, camelApi, "`", "`",
+		module, camelApi, "`", "`",
 		"`", "`", camelApi, "`", "`",
 
 		"`", "`", camelApi, "`", "`",
@@ -235,12 +232,12 @@ func (uc *%vUseCase) Delete(ctx context.Context, ids ...uint64) error {
 		camelApi, camelApi, camelApi, camelApi, camelApi,
 
 		camelApi, camelApi, camelApi, camelApi, camelApi,
-		api, camelApi, camelApi, camelApi, camelApi,
+		camelApi, camelApi, camelApi, camelApi, camelApi,
 
 		camelApi, camelApi, camelApi, camelApi, camelApi,
 		camelApi, camelApi, camelApi, camelApi, camelApi,
 
-		camelApi, camelApi, camelApi, camelApi,
+		camelApi, camelApi, camelApi,
 	)
 
 	_, err = f.Write([]byte(content))

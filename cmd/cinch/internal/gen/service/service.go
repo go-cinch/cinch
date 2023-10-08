@@ -127,7 +127,10 @@ func (s *%vService) Find%v(ctx context.Context, req *%v.Find%vRequest) (rp *%v.F
 	r.Page = page.Page{}
 	copierx.Copy(&r, req)
 	copierx.Copy(&r.Page, req.Page)
-	res := s.%v.Find(ctx, r)
+	res, err := s.%v.Find(ctx, r)
+	if err != nil {
+		return
+	}
 	copierx.Copy(&rp.Page, r.Page)
 	copierx.Copy(&rp.List, res)
 	return

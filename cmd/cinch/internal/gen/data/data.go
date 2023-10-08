@@ -85,9 +85,8 @@ import (
 
 	"github.com/go-cinch/common/constant"
 	"github.com/go-cinch/common/copierx"
-	"github.com/go-cinch/common/middleware/i18n"
+	"github.com/go-cinch/common/log"
 	"github.com/go-cinch/common/utils"
-	"%v/api/reason"
 	"%v/internal/biz"
 	"%v/internal/data/model"
 	"%v/internal/data/query"
@@ -107,7 +106,7 @@ func New%vRepo(data *Data) biz.%vRepo {
 func (ro %vRepo) Create(ctx context.Context, item *biz.%v) (err error) {
 	err = ro.NameExists(ctx, item.Name)
 	if err == nil {
-		err = reason.ErrorIllegalParameter("%%s %vname%v: %%s", i18n.FromContext(ctx).T(biz.DuplicateField), item.Name)
+		err = biz.ErrDuplicateField(ctx, "name", item.Name)
 		return
 	}
 	var m model.%v
@@ -125,7 +124,7 @@ func (ro %vRepo) Get(ctx context.Context, id uint64) (item *biz.%v, err error) {
 	db := p.WithContext(ctx)
 	m := db.GetByID(id)
 	if m.ID == constant.UI0 {
-		err = reason.ErrorNotFound("%%s %v.%vid%v: %%d", i18n.FromContext(ctx).T(biz.RecordNotFound), id)
+		err = biz.ErrRecordNotFound(ctx)
 		return
 	}
 	copierx.Copy(&item, m)
@@ -160,19 +159,19 @@ func (ro %vRepo) Update(ctx context.Context, item *biz.Update%v) (err error) {
 	db := p.WithContext(ctx)
 	m := db.GetByID(item.Id)
 	if m.ID == constant.UI0 {
-		err = reason.ErrorNotFound("%%s %v.%vid%v: %%d", i18n.FromContext(ctx).T(biz.RecordNotFound), item.Id)
+		err = biz.ErrRecordNotFound(ctx)
 		return
 	}
 	change := make(map[string]interface{})
 	utils.CompareDiff(m, item, &change)
 	if len(change) == 0 {
-		err = reason.ErrorIllegalParameter(i18n.FromContext(ctx).T(biz.DataNotChange))
+		err = biz.ErrDataNotChange(ctx)
 		return
 	}
 	if item.Name != nil && *item.Name != m.Name {
 		err = ro.NameExists(ctx, *item.Name)
 		if err == nil {
-			err = reason.ErrorIllegalParameter("%%s %vname%v: %%s", i18n.FromContext(ctx).T(biz.DuplicateField), *item.Name)
+			err = biz.ErrDuplicateField(ctx, "name", *item.Name)
 			return
 		}
 	}
@@ -198,26 +197,24 @@ func (ro %vRepo) NameExists(ctx context.Context, name string) (err error) {
 	for _, item := range arr {
 		res := db.GetByCol("name", item)
 		if res.ID == constant.UI0 {
-			err = reason.ErrorNotFound("%%s %v.%vname%v: %%s", i18n.FromContext(ctx).T(biz.RecordNotFound), item)
+			err = biz.ErrRecordNotFound(ctx)
+			log.
+				WithError(err).
+				Error("invalid %vname%v: %%s", name)
 			return
 		}
 	}
 	return
 }
 `,
-		module, module, module, module, api,
-		camelApi, camelApi, api, api, camelApi,
+		module, module, module, api, camelApi,
+		camelApi, api, api, camelApi, camelApi,
 
-		"`", "`", camelApi, camelApi, api,
-		camelApi, camelApi, camelApi, camelApi,
+		camelApi, api, camelApi, camelApi, camelApi,
+		api, camelApi, camelApi, camelApi, camelApi,
 
-		"`", "`", api, camelApi, camelApi,
-		camelApi, camelApi, camelApi, api, camelApi,
-
-		camelApi, camelApi, "`", "`", "`",
-		"`", api, camelApi, api, camelApi,
-
-		camelApi, "`", "`",
+		camelApi, api, camelApi, camelApi, api,
+		camelApi, api, camelApi, "`", "`",
 	)
 
 	_, err = f.Write([]byte(content))

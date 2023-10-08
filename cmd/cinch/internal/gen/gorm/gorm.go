@@ -117,6 +117,14 @@ type CmdParams struct {
 	Gen *CmdGenParams `yaml:"gen"`
 }
 
+type AssociationType struct {
+	TableName        string
+	Relation         string
+	FieldName        string
+	RelationshipType string
+	ForeignKey       string
+}
+
 // connectDB choose db type for connection to database
 func connectDB(t DBType, dsn string) (*gorm.DB, error) {
 	if dsn == "" {
@@ -173,36 +181,47 @@ func genModels(cfg *CmdGenParams) (err error) {
 	g := newGenerator(cfg)
 	relations := make([]string, 0, len(*cfg.Association))
 	sources := make([]string, 0, len(*cfg.Association))
+	//var option gen.ModelOpt
+	associations := make(map[string][]gen.ModelOpt)
 	for _, item := range *cfg.Association {
 		arr := strings.Split(item, "|")
 		arr2 := strings.Split(arr[4], ":")
-		source := arr[0]
-		relation := arr[1]
-		fieldName := arr[2]
-		// get gorm tag
-		tag := field.NewGormTag()
+		// 创建并保存AssociationType
+		at := AssociationType{
+			TableName:        arr[0],
+			Relation:         arr[1],
+			FieldName:        arr[2],
+			RelationshipType: arr[3],
+			ForeignKey:       arr2[1],
+		}
+		tag := field.GormTag{}
 		tag.Set(arr2[0], arr2[1])
 		// save source and relation
-		if !utils.Contains[string](relations, relation) {
-			relations = append(relations, relation)
+		if !utils.Contains[string](relations, at.Relation) {
+			relations = append(relations, at.Relation)
 		}
-		if !utils.Contains[string](sources, source) {
-			sources = append(sources, source)
+		if !utils.Contains[string](sources, at.TableName) {
+			sources = append(sources, at.TableName)
 		}
 
-		relationNs := needAddStringTag(cfg, relation)
-		sourceNs := needAddStringTag(cfg, source)
+		relationNs := needAddStringTag(cfg, at.Relation)
+		sourceNs := needAddStringTag(cfg, at.TableName)
 		// generate model with opt
-		m := g.GenerateModel(
-			source,
-			gen.FieldRelate(
-				field.RelationshipType(arr[3]),
-				fieldName,
-				newGenerator(cfg).GenerateModel(relation, gen.FieldJSONTagWithNS(relationNs)),
-				&field.RelateConfig{GORMTag: tag},
-			),
-			gen.FieldJSONTagWithNS(sourceNs),
-		)
+		associations[at.TableName] = append(associations[at.TableName], gen.FieldRelate(
+			field.RelationshipType(at.RelationshipType),
+			at.FieldName,
+			newGenerator(cfg).GenerateModel(at.Relation, gen.FieldJSONTagWithNS(relationNs)),
+			&field.RelateConfig{
+				GORMTag: tag,
+				// json tag use camel case
+				JSONTag: utils.CamelCaseLowerFirst(at.Relation),
+			},
+		))
+		associations[at.TableName] = append(associations[at.TableName], gen.FieldJSONTagWithNS(sourceNs))
+	}
+
+	for tableName, queryStructMetas := range associations {
+		m := g.GenerateModel(tableName, queryStructMetas...)
 		models = append(models, m)
 	}
 
@@ -300,6 +319,9 @@ func newGenerator(cfg *CmdGenParams) *gen.Generator {
 		"datetime": func(columnType gorm.ColumnType) (dataType string) {
 			return "carbon.DateTime"
 		},
+		"date": func(columnType gorm.ColumnType) (dataType string) {
+			return "carbon.Date"
+		},
 	}
 
 	g.WithDataTypeMap(dataMap)
@@ -310,6 +332,8 @@ func newGenerator(cfg *CmdGenParams) *gen.Generator {
 		}
 		return utils.CamelCaseLowerFirst(columnName)
 	})
+	// support gorm soft delete
+	g.WithOpts(gen.FieldType("deleted_at", "gorm.DeletedAt"))
 	return g
 }
 

@@ -89,8 +89,10 @@ func (p *Project) customChange(to string) (err error) {
 		filepath.Join(to, "internal", "db", "migrations", "2022081510-game.sql"),
 		filepath.Join(to, "internal", "pkg", "task", "task.go"),
 		filepath.Join(to, "internal", "server", "grpc.go"),
+		filepath.Join(to, "internal", "server", "health.go"),
 		filepath.Join(to, "internal", "server", "http.go"),
 		filepath.Join(to, "internal", "service", "service.go"),
+		filepath.Join(to, "internal", "service", "health.go"),
 	}
 
 	for _, item := range contents {
