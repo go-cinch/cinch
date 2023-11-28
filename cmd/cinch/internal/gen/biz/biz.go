@@ -155,11 +155,11 @@ func (uc *%vUseCase) Get(ctx context.Context, id uint64) (rp *%v, err error) {
 	if err != nil {
 		return
 	}
+	utils.Json2Struct(&rp, str)
 	if rp.Id == constant.UI0 {
 		err = ErrRecordNotFound(ctx)
 		return
 	}
-	utils.Json2Struct(&rp, str)
 	return
 }
 

@@ -126,6 +126,10 @@ func (p *Project) customChange(to string) (err error) {
 			filepath.Join(to, "internal", "biz", p.Name+".go"),
 		},
 		{
+			filepath.Join(to, "internal", "data", "game.go"),
+			filepath.Join(to, "internal", "data", p.Name+".go"),
+		},
+		{
 			filepath.Join(to, "internal", "db", "migrations", "2022081510-game.sql"),
 			filepath.Join(to, "internal", "db", "migrations", "2022081510-"+p.Name+".sql"),
 		},
