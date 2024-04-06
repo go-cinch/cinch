@@ -200,7 +200,7 @@ func (ro %vRepo) NameExists(ctx context.Context, name string) (err error) {
 			err = biz.ErrRecordNotFound(ctx)
 			log.
 				WithError(err).
-				Error("invalid %vname%v: %%s", name)
+				Warn("invalid %vname%v: %%s", name)
 			return
 		}
 	}

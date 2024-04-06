@@ -232,7 +232,7 @@ func (uc *%vUseCase) Delete(ctx context.Context, ids ...uint64) error {
 		camelApi, camelApi, camelApi, camelApi, camelApi,
 
 		camelApi, camelApi, camelApi, camelApi, camelApi,
-		camelApi, camelApi, camelApi, camelApi, camelApi,
+		api, camelApi, camelApi, camelApi, camelApi,
 
 		camelApi, camelApi, camelApi, camelApi, camelApi,
 		camelApi, camelApi, camelApi, camelApi, camelApi,
