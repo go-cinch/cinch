@@ -85,7 +85,9 @@ func run(cmd *cobra.Command, _ []string) {
 
 package %v.v1;
 
+import "openapiv3/annotations.proto";
 import "google/api/annotations.proto";
+import "google/api/field_behavior.proto";
 import "google/protobuf/empty.proto";
 import "cinch/params/params.proto";
 
@@ -94,24 +96,62 @@ option java_multiple_files = true;
 option java_package = "%v.v1";
 option java_outer_classname = "%vProtoV1";
 
-// The %v service definition.
+option (openapi.v3.document) = {
+  info: {
+    title: "%s service";
+    version: "1.0.0";
+    description: "This is %s service docs";
+  }
+  components: {
+    security_schemes: {
+      additional_properties: [
+        {
+          name: "BearerAuth";
+          value: {
+            security_scheme: {
+              type: "http";
+              scheme: "bearer";
+            }
+          }
+        }
+      ]
+    }
+  }
+  security: [
+    {
+      additional_properties: [
+        {
+          name: "BearerAuth";
+          value: {
+            value: []
+          }
+        }
+      ]
+    }
+  ]
+};
+
 service %v {
+  // create one %v record
   rpc Create%v (Create%vRequest) returns (google.protobuf.Empty) {
     option (google.api.http) = {
       post: "/%v"
       body: "*"
     };
   }
+  // query one %v record
   rpc Get%v (Get%vRequest) returns (Get%vReply) {
     option (google.api.http) = {
       get: "/%v/{id}"
     };
   }
+  // query %v list by page
   rpc Find%v (Find%vRequest) returns (Find%vReply) {
     option (google.api.http) = {
       get: "/%v"
     };
   }
+  // update one %v record by id
   rpc Update%v (Update%vRequest) returns (google.protobuf.Empty) {
     option (google.api.http) = {
       put: "/%v/{id}"
@@ -122,9 +162,10 @@ service %v {
       }
     };
   }
+  // delete one or more %v record by id
   rpc Delete%v (params.IdsRequest) returns (google.protobuf.Empty) {
     option (google.api.http) = {
-      delete: "/%v/{ids}"
+      delete: "/%v"
     };
   }
 }
@@ -135,11 +176,11 @@ message %vReply {
 }
 
 message Create%vRequest {
-  string name = 1;
+  string name = 1 [(google.api.field_behavior) = REQUIRED];
 }
 
 message Get%vRequest {
-  uint64 id = 1;
+  uint64 id = 1 [(google.api.field_behavior) = REQUIRED];
 }
 
 message Get%vReply {
@@ -158,20 +199,59 @@ message Find%vReply {
 }
 
 message Update%vRequest {
-  uint64 id = 1;
+  uint64 id = 1 [(google.api.field_behavior) = REQUIRED];
   optional string name = 2;
 }
 `,
-		module, module, module, module, camelModule,
-		module, camelModule, camelApi, camelApi, api,
+		// import
+		module,
+		module, module,
+		module,
+		camelModule,
 
-		camelApi, camelApi, camelApi, api, camelApi,
-		camelApi, camelApi, api, camelApi, camelApi,
+		// openapi.v3
+		camelModule,
+		module,
 
-		api, api, camelApi, api, camelApi,
-		camelApi, camelApi, camelApi, camelApi, camelApi,
+		// service
+		camelModule,
+
+		// create
+		camelApi,
+		camelApi, camelApi,
+		api,
+
+		// get
+		camelApi,
+		camelApi, camelApi, camelApi,
+		api,
+
+		// find
+		camelApi,
+		camelApi, camelApi, camelApi,
+		api,
+
+		// update
+		camelApi,
+		camelApi, camelApi,
+		api,
+		api,
+
+		// delete
+		camelApi,
+		camelApi,
+		api,
+
+		// message
+		camelApi,
+		camelApi,
+		camelApi,
+		camelApi,
+		camelApi,
 
 		camelApi, camelApi,
+
+		camelApi,
 	)
 
 	_, err = f.Write([]byte(content))
