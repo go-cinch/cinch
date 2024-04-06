@@ -70,6 +70,7 @@ func (p *Project) customChange(to string) (err error) {
 	replaceContent(filepath.Join(to, "configs", "gen.yml"), "layout", p.Name)
 
 	replaceContent(filepath.Join(to, "Dockerfile"), "./server", "./"+p.Name)
+	replaceContent(filepath.Join(to, ".gitignore"), "game", p.Name)
 
 	os.Rename(filepath.Join(to, "cmd", "server"), filepath.Join(to, "cmd", p.Name))
 
@@ -82,8 +83,13 @@ func (p *Project) customChange(to string) (err error) {
 		filepath.Join(to, "api", "game", "game_grpc.pb.go"),
 		filepath.Join(to, "api", "game", "game_http.pb.go"),
 		filepath.Join(to, "cmd", p.Name, "wire_gen.go"),
+		filepath.Join(to, "configs", "gen.yml"),
 		filepath.Join(to, "internal", "biz", "biz.go"),
 		filepath.Join(to, "internal", "biz", "game.go"),
+		filepath.Join(to, "internal", "data", "model", "game.gen.go"),
+		filepath.Join(to, "internal", "data", "query", "game.gen.go"),
+		filepath.Join(to, "internal", "data", "query", "gen.go"),
+		filepath.Join(to, "internal", "data", "client.go"),
 		filepath.Join(to, "internal", "data", "data.go"),
 		filepath.Join(to, "internal", "data", "game.go"),
 		filepath.Join(to, "internal", "db", "migrations", "2022081510-game.sql"),
@@ -91,8 +97,12 @@ func (p *Project) customChange(to string) (err error) {
 		filepath.Join(to, "internal", "server", "grpc.go"),
 		filepath.Join(to, "internal", "server", "health.go"),
 		filepath.Join(to, "internal", "server", "http.go"),
+		filepath.Join(to, "internal", "service", "game.go"),
 		filepath.Join(to, "internal", "service", "service.go"),
 		filepath.Join(to, "internal", "service", "health.go"),
+		filepath.Join(to, "internal", "tests", "mock", "mock.go"),
+		filepath.Join(to, "internal", "tests", "service", "game_test.go"),
+		filepath.Join(to, ".gitmodules"),
 	}
 
 	for _, item := range contents {
@@ -122,8 +132,20 @@ func (p *Project) customChange(to string) (err error) {
 			filepath.Join(to, "api", p.Name),
 		},
 		{
+			filepath.Join(to, "api", "game-proto"),
+			filepath.Join(to, "api", p.Name+"-proto"),
+		},
+		{
 			filepath.Join(to, "internal", "biz", "game.go"),
 			filepath.Join(to, "internal", "biz", p.Name+".go"),
+		},
+		{
+			filepath.Join(to, "internal", "data", "model", "game.gen.go"),
+			filepath.Join(to, "internal", "data", "model", p.Name+"gen.go"),
+		},
+		{
+			filepath.Join(to, "internal", "data", "query", "game.gen.go"),
+			filepath.Join(to, "internal", "data", "query", p.Name+".gen.go"),
 		},
 		{
 			filepath.Join(to, "internal", "data", "game.go"),
@@ -137,11 +159,20 @@ func (p *Project) customChange(to string) (err error) {
 			filepath.Join(to, "internal", "service", "game.go"),
 			filepath.Join(to, "internal", "service", p.Name+".go"),
 		},
+		{
+			filepath.Join(to, "internal", "tests", "service", "game_test.go"),
+			filepath.Join(to, "internal", "tests", "service", p.Name+"_test.go"),
+		},
 	}
 
 	for _, item := range renames {
 		os.Rename(item[0], item[1])
 	}
+
+	clearREADME(
+		filepath.Join(to, "README.md"),
+		fmt.Sprintf(`<h1 align="center">%s Service</h1>`, camelCase(p.Name)),
+	)
 
 	base.Lint(to)
 
@@ -157,6 +188,14 @@ func replaceContent(src, o, n string) (err error) {
 	newContents := strings.Replace(string(read), o, n, -1)
 
 	err = os.WriteFile(src, []byte(newContents), 0)
+	if err != nil {
+		return
+	}
+	return
+}
+
+func clearREADME(src, n string) (err error) {
+	err = os.WriteFile(src, []byte(n), 0)
 	if err != nil {
 		return
 	}
