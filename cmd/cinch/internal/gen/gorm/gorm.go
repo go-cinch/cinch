@@ -181,12 +181,36 @@ func genModels(cfg *CmdGenParams) (err error) {
 	g := newGenerator(cfg)
 	relations := make([]string, 0, len(*cfg.Association))
 	sources := make([]string, 0, len(*cfg.Association))
-	//var option gen.ModelOpt
+	// var option gen.ModelOpt
 	associations := make(map[string][]gen.ModelOpt)
 	for _, item := range *cfg.Association {
 		arr := strings.Split(item, "|")
+		if len(arr) == 2 {
+			// only set table field pointer
+			tableName := arr[0]
+			arr2 := strings.Split(arr[1], ",")
+			fields := make([]string, len(arr2))
+			for i, name := range arr2 {
+				if strings.HasPrefix(name, "*") {
+					fieldName := strings.ToLower(strings.TrimPrefix(name, "*"))
+					fields[i] = fieldName
+				}
+			}
+			if len(fields) > 0 {
+				associations[tableName] = append(associations[tableName], gen.FieldModify(func(f gen.Field) gen.Field {
+					for _, name := range fields {
+						if !strings.HasPrefix(f.Type, "*") && strings.ToLower(utils.CamelCase(f.Name)) == name {
+							f.Type = "*" + f.Type
+							break
+						}
+					}
+					return f
+				}))
+			}
+			continue
+		}
+
 		arr2 := strings.Split(arr[4], ":")
-		// 创建并保存AssociationType
 		at := AssociationType{
 			TableName:        arr[0],
 			Relation:         arr[1],
@@ -206,15 +230,35 @@ func genModels(cfg *CmdGenParams) (err error) {
 
 		relationNs := needAddStringTag(cfg, at.Relation)
 		sourceNs := needAddStringTag(cfg, at.TableName)
+		var relatePointer, relateSlice, relateSlicePointer bool
+		if at.TableName == at.Relation {
+			// self relation need set pointer
+			relatePointer = true
+		}
+		// field is array
+		if strings.HasPrefix(at.FieldName, "[]*") {
+			relatePointer = false
+			relateSlicePointer = true
+			at.FieldName = strings.TrimPrefix(at.FieldName, "[]*")
+		} else if strings.HasPrefix(at.FieldName, "[]") {
+			relatePointer = false
+			relateSlice = true
+			at.FieldName = strings.TrimPrefix(at.FieldName, "[]")
+		} else if strings.HasPrefix(at.FieldName, "*") {
+			relatePointer = true
+			at.FieldName = strings.TrimPrefix(at.FieldName, "*")
+		}
 		// generate model with opt
 		associations[at.TableName] = append(associations[at.TableName], gen.FieldRelate(
 			field.RelationshipType(at.RelationshipType),
 			at.FieldName,
 			newGenerator(cfg).GenerateModel(at.Relation, gen.FieldJSONTagWithNS(relationNs)),
 			&field.RelateConfig{
-				GORMTag: tag,
-				// json tag use camel case
-				JSONTag: utils.CamelCaseLowerFirst(at.Relation),
+				RelatePointer:      relatePointer,
+				RelateSlice:        relateSlice,
+				RelateSlicePointer: relateSlicePointer,
+				GORMTag:            tag,
+				JSONTag:            utils.CamelCaseLowerFirst(at.FieldName), // json tag use camel case
 			},
 		))
 		associations[at.TableName] = append(associations[at.TableName], gen.FieldJSONTagWithNS(sourceNs))
@@ -270,10 +314,6 @@ func newDB(cfg *CmdGenParams) *gorm.DB {
 		log.Fatalln("connect db server fail:", err)
 	}
 	return gormDB
-}
-
-func generateWithOpts() {
-
 }
 
 func needAddStringTag(cfg *CmdGenParams, tableName string) func(columnName string) string {
@@ -367,6 +407,9 @@ func parseConfig(cmd *cobra.Command) (*CmdGenParams, error) {
 	}
 	for _, item := range *cfg.Gen.Association {
 		arr := strings.Split(item, "|")
+		if len(arr) == 2 {
+			continue
+		}
 		if len(arr) != 5 {
 			return nil, errors.Errorf("invalid association tables: %s", item)
 		}
