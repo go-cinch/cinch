@@ -92,6 +92,10 @@ import (
 	"github.com/pkg/errors"
 )
 
+type Create%v struct {
+	Name string %vjson:"name"%v
+}
+
 type %v struct {
 	Id   uint64 %vjson:"id,string"%v
 	Name string %vjson:"name"%v
@@ -113,7 +117,7 @@ type Update%v struct {
 }
 
 type %vRepo interface {
-	Create(ctx context.Context, item *%v) error
+	Create(ctx context.Context, item *Create%v) error
 	Get(ctx context.Context, id uint64) (*%v, error)
 	Find(ctx context.Context, condition *Find%v) []%v
 	Update(ctx context.Context, item *Update%v) error
@@ -138,7 +142,7 @@ func New%vUseCase(c *conf.Bootstrap, repo %vRepo, tx Transaction, cache Cache) *
 	}
 }
 
-func (uc *%vUseCase) Create(ctx context.Context, item *%v) error {
+func (uc *%vUseCase) Create(ctx context.Context, item *Create%v) error {
 	return uc.tx.Tx(ctx, func(ctx context.Context) error {
 		return uc.cache.Flush(ctx, func(ctx context.Context) error {
 			return uc.repo.Create(ctx, item)
@@ -223,6 +227,7 @@ func (uc *%vUseCase) Delete(ctx context.Context, ids ...uint64) error {
 }
 `,
 		module, camelApi, "`", "`",
+		camelApi, "`", "`",
 		"`", "`", camelApi, "`", "`",
 
 		"`", "`", camelApi, "`", "`",

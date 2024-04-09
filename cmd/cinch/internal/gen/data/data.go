@@ -103,7 +103,7 @@ func New%vRepo(data *Data) biz.%vRepo {
 	}
 }
 
-func (ro %vRepo) Create(ctx context.Context, item *biz.%v) (err error) {
+func (ro %vRepo) Create(ctx context.Context, item *biz.Create%v) (err error) {
 	err = ro.NameExists(ctx, item.Name)
 	if err == nil {
 		err = biz.ErrDuplicateField(ctx, "name", item.Name)
