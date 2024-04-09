@@ -115,6 +115,12 @@ func (ro %vRepo) Create(ctx context.Context, item *biz.Create%v) (err error) {
 	db := p.WithContext(ctx)
 	m.ID = ro.data.Id(ctx)
 	err = db.Create(&m)
+	if err != nil {
+		log.
+			WithError(err).
+			Warn(err)
+		return
+	}
 	return
 }
 
@@ -178,6 +184,12 @@ func (ro %vRepo) Update(ctx context.Context, item *biz.Update%v) (err error) {
 	_, err = db.
 		Where(p.ID.Eq(item.Id)).
 		Updates(&change)
+	if err != nil {
+		log.
+			WithError(err).
+			Warn(err)
+		return
+	}
 	return
 }
 
@@ -187,6 +199,12 @@ func (ro %vRepo) Delete(ctx context.Context, ids ...uint64) (err error) {
 	_, err = db.
 		Where(p.ID.In(ids...)).
 		Delete()
+	if err != nil {
+		log.
+			WithError(err).
+			Warn(err)
+		return
+	}
 	return
 }
 
