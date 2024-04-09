@@ -135,29 +135,29 @@ service %v {
   // create one %v record
   rpc Create%v (Create%vRequest) returns (google.protobuf.Empty) {
     option (google.api.http) = {
-      post: "/%v"
+      post: "/%v/create"
       body: "*"
     };
   }
   // query one %v record
   rpc Get%v (Get%vRequest) returns (Get%vReply) {
     option (google.api.http) = {
-      get: "/%v/{id}"
+      get: "/%v/get/{id}"
     };
   }
   // query %v list by page
   rpc Find%v (Find%vRequest) returns (Find%vReply) {
     option (google.api.http) = {
-      get: "/%v"
+      get: "/%v/list"
     };
   }
   // update one %v record by id
   rpc Update%v (Update%vRequest) returns (google.protobuf.Empty) {
     option (google.api.http) = {
-      put: "/%v/{id}"
+      put: "/%v/update/{id}"
       body: "*",
       additional_bindings {
-        patch: "/%v/{id}",
+        patch: "/%v/update/{id}",
         body: "*",
       }
     };
@@ -165,7 +165,7 @@ service %v {
   // delete one or more %v record by id
   rpc Delete%v (params.IdsRequest) returns (google.protobuf.Empty) {
     option (google.api.http) = {
-      delete: "/%v"
+      delete: "/%v/delete"
     };
   }
 }

@@ -157,7 +157,7 @@ func (s *%vService) Delete%v(ctx context.Context, req *params.IdsRequest) (rp *e
 }
 `,
 		module, module, module, camelModule, camelApi,
-		module, camelApi, camelModule, camelApi, api,
+		camelApi, camelApi, camelModule, camelApi, api,
 
 		camelModule, camelApi, module, camelApi, module,
 		camelApi, camelApi, module, camelApi, api,

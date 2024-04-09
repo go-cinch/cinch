@@ -141,7 +141,7 @@ func (p *Project) customChange(to string) (err error) {
 		},
 		{
 			filepath.Join(to, "internal", "data", "model", "game.gen.go"),
-			filepath.Join(to, "internal", "data", "model", p.Name+"gen.go"),
+			filepath.Join(to, "internal", "data", "model", p.Name+".gen.go"),
 		},
 		{
 			filepath.Join(to, "internal", "data", "query", "game.gen.go"),
