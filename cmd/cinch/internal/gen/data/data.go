@@ -75,6 +75,7 @@ func run(cmd *cobra.Command, _ []string) {
 		return
 	}
 
+	api = utils.CamelCaseLowerFirst(api)
 	camelApi := utils.CamelCase(api)
 
 	content := fmt.Sprintf(`package data
@@ -113,14 +114,8 @@ func (ro %vRepo) Create(ctx context.Context, item *biz.Create%v) (err error) {
 	copierx.Copy(&m, item)
 	p := query.Use(ro.data.DB(ctx)).%v
 	db := p.WithContext(ctx)
-	m.ID = ro.data.Id(ctx)
+	m.ID = ro.data.ID(ctx)
 	err = db.Create(&m)
-	if err != nil {
-		log.
-			WithError(err).
-			Warn(err)
-		return
-	}
 	return
 }
 
@@ -163,7 +158,7 @@ func (ro %vRepo) Find(ctx context.Context, condition *biz.Find%v) (rp []biz.%v) 
 func (ro %vRepo) Update(ctx context.Context, item *biz.Update%v) (err error) {
 	p := query.Use(ro.data.DB(ctx)).%v
 	db := p.WithContext(ctx)
-	m := db.GetByID(item.Id)
+	m := db.GetByID(item.ID)
 	if m.ID == constant.UI0 {
 		err = biz.ErrRecordNotFound(ctx)
 		return
@@ -182,14 +177,8 @@ func (ro %vRepo) Update(ctx context.Context, item *biz.Update%v) (err error) {
 		}
 	}
 	_, err = db.
-		Where(p.ID.Eq(item.Id)).
+		Where(p.ID.Eq(item.ID)).
 		Updates(&change)
-	if err != nil {
-		log.
-			WithError(err).
-			Warn(err)
-		return
-	}
 	return
 }
 
@@ -199,12 +188,6 @@ func (ro %vRepo) Delete(ctx context.Context, ids ...uint64) (err error) {
 	_, err = db.
 		Where(p.ID.In(ids...)).
 		Delete()
-	if err != nil {
-		log.
-			WithError(err).
-			Warn(err)
-		return
-	}
 	return
 }
 

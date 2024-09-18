@@ -183,6 +183,7 @@ func genModels(cfg *CmdGenParams) (err error) {
 	sources := make([]string, 0, len(*cfg.Association))
 	// var option gen.ModelOpt
 	associations := make(map[string][]gen.ModelOpt)
+	pointers := make([]string, 0, len(*cfg.Association))
 	for _, item := range *cfg.Association {
 		arr := strings.Split(item, "|")
 		if len(arr) == 2 {
@@ -207,19 +208,27 @@ func genModels(cfg *CmdGenParams) (err error) {
 					return f
 				}))
 			}
+			pointers = append(pointers, tableName)
 			continue
 		}
 
-		arr2 := strings.Split(arr[4], ":")
+		// create a AssociationType
 		at := AssociationType{
 			TableName:        arr[0],
 			Relation:         arr[1],
 			FieldName:        arr[2],
 			RelationshipType: arr[3],
-			ForeignKey:       arr2[1],
 		}
 		tag := field.GormTag{}
-		tag.Set(arr2[0], arr2[1])
+		// support multi tags
+		arr2 := strings.Split(arr[4], ";")
+		for _, arr2item := range arr2 {
+			arr22 := strings.Split(arr2item, ":")
+			if len(arr22) != 2 {
+				continue
+			}
+			tag.Set(arr22[0], arr22[1])
+		}
 		// save source and relation
 		if !utils.Contains[string](relations, at.Relation) {
 			relations = append(relations, at.Relation)
@@ -271,7 +280,7 @@ func genModels(cfg *CmdGenParams) (err error) {
 
 	// relation in sources means generate model with opt, not in is simple
 	for _, item := range relations {
-		if !utils.Contains[string](sources, item) {
+		if !utils.Contains[string](append(sources, pointers...), item) {
 			simpleTables = append(simpleTables, item)
 		}
 	}
@@ -412,10 +421,6 @@ func parseConfig(cmd *cobra.Command) (*CmdGenParams, error) {
 		}
 		if len(arr) != 5 {
 			return nil, errors.Errorf("invalid association tables: %s", item)
-		}
-		arr2 := strings.Split(arr[4], ":")
-		if len(arr2) != 2 {
-			return nil, errors.Errorf("invalid association tables gorm tag: %s", arr[4])
 		}
 	}
 	for _, item := range *cfg.Gen.FieldWithStringTag {

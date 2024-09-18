@@ -18,10 +18,11 @@ const (
 )
 
 var CmdService = &cobra.Command{
-	Use:   "service",
-	Short: "Generate service file. Example: cinch gen service -p internal/service/game.go",
-	Long:  "Generate service file, contains basic CRUD api. Example: cinch gen service -p internal/service/game.go",
-	Run:   run,
+	Use:     "service",
+	Aliases: []string{"svc"},
+	Short:   "Generate service file. Example: cinch gen service -p internal/service/game.go",
+	Long:    "Generate service file, contains basic CRUD api. Example: cinch gen service -p internal/service/game.go",
+	Run:     run,
 }
 
 func init() {
@@ -76,6 +77,7 @@ func run(cmd *cobra.Command, _ []string) {
 	}
 
 	camelModule := utils.CamelCase(module)
+	api = utils.CamelCaseLowerFirst(api)
 	camelApi := utils.CamelCase(api)
 
 	content := fmt.Sprintf(`package service
@@ -157,7 +159,7 @@ func (s *%vService) Delete%v(ctx context.Context, req *params.IdsRequest) (rp *e
 }
 `,
 		module, module, module, camelModule, camelApi,
-		camelApi, camelApi, camelModule, camelApi, api,
+		module, camelApi, camelApi, camelApi, api,
 
 		camelModule, camelApi, module, camelApi, module,
 		camelApi, camelApi, module, camelApi, api,

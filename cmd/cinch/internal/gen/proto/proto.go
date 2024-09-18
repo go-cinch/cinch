@@ -140,9 +140,9 @@ service %v {
     };
   }
   // query one %v record
-  rpc Get%v (Get%vRequest) returns (%vReply) {
+  rpc Get%v (Get%vRequest) returns (Get%vReply) {
     option (google.api.http) = {
-      get: "/%v/get/{id}"
+      get: "/%v/get"
     };
   }
   // query %v list by page
@@ -154,11 +154,11 @@ service %v {
   // update one %v record by id
   rpc Update%v (Update%vRequest) returns (google.protobuf.Empty) {
     option (google.api.http) = {
-      put: "/%v/update/{id}"
-      body: "*"
+      put: "/%v/update"
+      body: "*",
       additional_bindings {
-        patch: "/%v/update/{id}"
-        body: "*"
+        patch: "/%v/update",
+        body: "*",
       }
     };
   }
@@ -181,6 +181,11 @@ message Create%vRequest {
 
 message Get%vRequest {
   uint64 id = 1 [(google.api.field_behavior) = REQUIRED];
+}
+
+message Get%vReply {
+  uint64 id = 1;
+  string name = 2;
 }
 
 message Find%vRequest {
@@ -238,6 +243,7 @@ message Update%vRequest {
 		api,
 
 		// message
+		camelApi,
 		camelApi,
 		camelApi,
 		camelApi,

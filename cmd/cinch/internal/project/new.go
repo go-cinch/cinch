@@ -132,36 +132,16 @@ func (p *Project) customChange(to string) (err error) {
 			filepath.Join(to, "api", p.Name),
 		},
 		{
-			filepath.Join(to, "api", "game-proto"),
-			filepath.Join(to, "api", p.Name+"-proto"),
-		},
-		{
 			filepath.Join(to, "internal", "biz", "game.go"),
 			filepath.Join(to, "internal", "biz", p.Name+".go"),
-		},
-		{
-			filepath.Join(to, "internal", "data", "model", "game.gen.go"),
-			filepath.Join(to, "internal", "data", "model", p.Name+".gen.go"),
-		},
-		{
-			filepath.Join(to, "internal", "data", "query", "game.gen.go"),
-			filepath.Join(to, "internal", "data", "query", p.Name+".gen.go"),
 		},
 		{
 			filepath.Join(to, "internal", "data", "game.go"),
 			filepath.Join(to, "internal", "data", p.Name+".go"),
 		},
 		{
-			filepath.Join(to, "internal", "db", "migrations", "2022081510-game.sql"),
+			filepath.Join(to, "internal", "db", "migrations", "2022081510-example.sql"),
 			filepath.Join(to, "internal", "db", "migrations", "2022081510-"+p.Name+".sql"),
-		},
-		{
-			filepath.Join(to, "internal", "service", "game.go"),
-			filepath.Join(to, "internal", "service", p.Name+".go"),
-		},
-		{
-			filepath.Join(to, "internal", "tests", "service", "game_test.go"),
-			filepath.Join(to, "internal", "tests", "service", p.Name+"_test.go"),
 		},
 	}
 

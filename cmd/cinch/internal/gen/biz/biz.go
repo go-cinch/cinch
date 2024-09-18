@@ -93,11 +93,12 @@ import (
 )
 
 type Create%v struct {
+	ID   uint64 %vjson:"id,string"%v
 	Name string %vjson:"name"%v
 }
 
 type %v struct {
-	Id   uint64 %vjson:"id,string"%v
+	ID   uint64 %vjson:"id,string"%v
 	Name string %vjson:"name"%v
 }
 
@@ -112,7 +113,7 @@ type Find%vCache struct {
 }
 
 type Update%v struct {
-	Id   uint64  %vjson:"id,string"%v
+	ID   uint64  %vjson:"id,string"%v
 	Name *string %vjson:"name,omitempty"%v
 }
 
@@ -160,7 +161,7 @@ func (uc *%vUseCase) Get(ctx context.Context, id uint64) (rp *%v, err error) {
 		return
 	}
 	utils.Json2Struct(&rp, str)
-	if rp.Id == constant.UI0 {
+	if rp.ID == constant.UI0 {
 		err = ErrRecordNotFound(ctx)
 		return
 	}
@@ -226,23 +227,23 @@ func (uc *%vUseCase) Delete(ctx context.Context, ids ...uint64) error {
 	})
 }
 `,
-		module, camelApi, "`", "`",
-		camelApi, "`", "`",
+		module, camelApi, "`", "`", "`",
+		"`", camelApi, "`", "`", "`",
+		"`", camelApi, "`", "`", "`",
+
+		"`", camelApi, "`", "`", camelApi,
 		"`", "`", camelApi, "`", "`",
 
-		"`", "`", camelApi, "`", "`",
-		camelApi, "`", "`", camelApi, "`",
-
-		"`", "`", "`", camelApi, camelApi,
+		"`", "`", camelApi, camelApi, camelApi,
 		camelApi, camelApi, camelApi, camelApi, camelApi,
 
+		camelApi, camelApi, camelApi, camelApi, api,
 		camelApi, camelApi, camelApi, camelApi, camelApi,
-		api, camelApi, camelApi, camelApi, camelApi,
 
 		camelApi, camelApi, camelApi, camelApi, camelApi,
 		camelApi, camelApi, camelApi, camelApi, camelApi,
 
-		camelApi, camelApi, camelApi,
+		camelApi, camelApi,
 	)
 
 	_, err = f.Write([]byte(content))
