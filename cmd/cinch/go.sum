@@ -1054,8 +1054,8 @@ github.com/ghodss/yaml v0.0.0-20150909031657-73d445a93680/go.mod h1:4dBDuWmgqj2H
 github.com/ghodss/yaml v1.0.0/go.mod h1:4dBDuWmgqj2HViK6kFavaiC9ZROes6MMH2rRYeMEF04=
 github.com/go-cinch/common/log v1.0.4 h1:cXOG6g9Oo5IyC0e+tDZ0qZ1AZFLN50EZdyxgEEnxeSs=
 github.com/go-cinch/common/log v1.0.4/go.mod h1:jKHISgmad+oMSoxYP74L3CWqNI9FP68D1jXPqEXS+Rs=
-github.com/go-cinch/common/plugins/gorm/filter v1.0.0 h1:H+f/gCoGUs+iNva01XHpdSGIUtMe4Bxzd3r7OWcwQfc=
-github.com/go-cinch/common/plugins/gorm/filter v1.0.0/go.mod h1:TaW5GveUIVMRi6Ho3/yPgfO8gLbGHHsKVdSC1NvKICk=
+github.com/go-cinch/common/plugins/gorm/filter v1.0.1 h1:kfFTYlj4S0k/Oyxcz2yvUS8KLhKkGwuqxv8vNMm+x8k=
+github.com/go-cinch/common/plugins/gorm/filter v1.0.1/go.mod h1:TaW5GveUIVMRi6Ho3/yPgfO8gLbGHHsKVdSC1NvKICk=
 github.com/go-cinch/common/utils v1.0.4 h1:RtvOUtwWRhlKfCblY/6m1Hfm0uI8pbkxWGmVYTxig+k=
 github.com/go-cinch/common/utils v1.0.4/go.mod h1:Nkt/2liz09nz0hsDoCVrQx4c3BZnAHQYt+qDEKkief4=
 github.com/go-faster/city v1.0.1 h1:4WAxSZ3V2Ws4QRDrscLEDcibJY8uf41H6AhXDrNDcGw=

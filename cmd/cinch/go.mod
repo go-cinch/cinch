@@ -5,7 +5,7 @@ go 1.20
 require (
 	github.com/AlecAivazis/survey/v2 v2.3.6
 	github.com/fatih/color v1.15.0
-	github.com/go-cinch/common/plugins/gorm/filter v1.0.0
+	github.com/go-cinch/common/plugins/gorm/filter v1.0.1
 	github.com/go-cinch/common/utils v1.0.4
 	github.com/go-gorp/gorp/v3 v3.1.0
 	github.com/go-sql-driver/mysql v1.7.1
