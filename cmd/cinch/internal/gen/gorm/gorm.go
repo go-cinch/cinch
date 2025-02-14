@@ -6,6 +6,7 @@ import (
 	"github.com/go-cinch/common/plugins/gorm/filter"
 	"github.com/go-cinch/common/utils"
 	"github.com/pkg/errors"
+	"github.com/samber/lo"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"gorm.io/driver/clickhouse"
@@ -161,10 +162,10 @@ func genModels(cfg *CmdGenParams) (err error) {
 	// get association tables by associationTables
 	for _, item := range *cfg.Association {
 		arr := strings.Split(item, "|")
-		if !utils.Contains[string](excludeTables, arr[0]) {
+		if !lo.Contains(excludeTables, arr[0]) {
 			excludeTables = append(excludeTables, arr[0])
 		}
-		if !utils.Contains[string](excludeTables, arr[1]) {
+		if !lo.Contains(excludeTables, arr[1]) {
 			excludeTables = append(excludeTables, arr[1])
 		}
 	}
@@ -172,7 +173,7 @@ func genModels(cfg *CmdGenParams) (err error) {
 	// remove excludeTables
 	simpleTables := make([]string, 0, len(targetTables))
 	for _, item := range targetTables {
-		if !utils.Contains[string](excludeTables, item) {
+		if !lo.Contains(excludeTables, item) {
 			simpleTables = append(simpleTables, item)
 		}
 	}
@@ -230,10 +231,10 @@ func genModels(cfg *CmdGenParams) (err error) {
 			tag.Set(arr22[0], arr22[1])
 		}
 		// save source and relation
-		if !utils.Contains[string](relations, at.Relation) {
+		if !lo.Contains(relations, at.Relation) {
 			relations = append(relations, at.Relation)
 		}
-		if !utils.Contains[string](sources, at.TableName) {
+		if !lo.Contains(sources, at.TableName) {
 			sources = append(sources, at.TableName)
 		}
 
@@ -280,7 +281,7 @@ func genModels(cfg *CmdGenParams) (err error) {
 
 	// relation in sources means generate model with opt, not in is simple
 	for _, item := range relations {
-		if !utils.Contains[string](append(sources, pointers...), item) {
+		if !lo.Contains(append(sources, pointers...), item) {
 			simpleTables = append(simpleTables, item)
 		}
 	}

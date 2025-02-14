@@ -160,7 +160,7 @@ func (uc *%vUseCase) Get(ctx context.Context, id uint64) (rp *%v, err error) {
 	if err != nil {
 		return
 	}
-	utils.Json2Struct(&rp, str)
+	utils.JSON2Struct(&rp, str)
 	if rp.ID == constant.UI0 {
 		err = ErrRecordNotFound(ctx)
 		return
@@ -177,7 +177,7 @@ func (uc *%vUseCase) get(ctx context.Context, action string, id uint64) (res str
 		return
 	}
 	copierx.Copy(&rp, item)
-	res = utils.Struct2Json(rp)
+	res = utils.Struct2JSON(rp)
 	uc.cache.Set(ctx, action, res, notFound)
 	return
 }
@@ -192,7 +192,7 @@ func (uc *%vUseCase) Find(ctx context.Context, condition *Find%v) (rp []%v, err 
 		return
 	}
 	var cache Find%vCache
-	utils.Json2Struct(&cache, str)
+	utils.JSON2Struct(&cache, str)
 	condition.Page = cache.Page
 	rp = cache.List
 	return
@@ -204,7 +204,7 @@ func (uc *%vUseCase) find(ctx context.Context, action string, condition *Find%v)
 	var cache Find%vCache
 	cache.List = list
 	cache.Page = condition.Page
-	res = utils.Struct2Json(cache)
+	res = utils.Struct2JSON(cache)
 	uc.cache.Set(ctx, action, res, len(list) == 0)
 	return
 }
