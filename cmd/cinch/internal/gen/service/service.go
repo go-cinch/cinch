@@ -100,7 +100,7 @@ func (s *%vService) Create%v(ctx context.Context, req *%v.Create%vRequest) (rp *
 	ctx, span := tr.Start(ctx, "Create%v")
 	defer span.End()
 	rp = &emptypb.Empty{}
-	r := &biz.%v{}
+	r := &biz.Create%v{}
 	copierx.Copy(&r, req)
 	err = s.%v.Create(ctx, r)
 	return
